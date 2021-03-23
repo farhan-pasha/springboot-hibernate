@@ -1,13 +1,15 @@
 package com.example.demo.Controller;
 
+import com.example.demo.service.ICaptchaService;
+import com.example.demo.service.InvalidReCaptchaException;
+import com.example.demo.service.ReCaptchaInvalidException;
 import com.example.demo.service.UserService;
 import com.example.demo.web.dto.UserRegistrationDto;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 @Controller
 @RequestMapping("/registration")
@@ -18,6 +20,9 @@ public class UserRegistrationController {
     public UserRegistrationController(UserService userService) {
         this.userService = userService;
     }
+
+    @Autowired
+    private ICaptchaService captchaService;
 
     //registration.html -> th:object="${user}"
     @ModelAttribute("user")
@@ -32,10 +37,14 @@ public class UserRegistrationController {
     }
 
     @PostMapping
+    @ResponseBody
     //@ModelAttribute("user") contains data coming from front end form which needs to be binded with DTO object
-    public String registerUserAccount(@ModelAttribute("user")UserRegistrationDto registrationDto) {
+    public String registerUserAccount(@ModelAttribute("user")UserRegistrationDto registrationDto, HttpServletRequest request) throws InvalidReCaptchaException, ReCaptchaInvalidException {
+        String response = request.getParameter("g-recaptcha-response");
+        //Shouldnt this be in a BEAN? request
+        captchaService.processResponse(request,response);
         userService.saveToDB(registrationDto);
-        return "redirect:/registration?success";
+        return "success";
     }
 
 }

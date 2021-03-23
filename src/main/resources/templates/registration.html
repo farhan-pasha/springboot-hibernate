@@ -7,6 +7,11 @@
           href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
           integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
           crossorigin="anonymous">
+    <script type="text/javascript" src='https://www.google.com/recaptcha/api.js'></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="test.js"></script>
+
 </head>
 <body>
 
@@ -38,6 +43,9 @@
             <div th:if="${param.success}">
                 <div class="alert alert-info">You've successfully registered!</div>
             </div>
+            <div th:if="${param.robot}">
+                <div class="alert alert-info">Please verify that you are not a robot.</div>
+            </div>
 
             <h1>Registration</h1>
 
@@ -49,7 +57,7 @@
                 return new UserRegistrationDto();//default constructor for UserRegistrationDto
             }
             -->
-            <form th:action="@{/registration}" method="post" th:object="${user}">
+            <form th:action="@{/registration}" method="post" th:object="${user}" id="registration">
                 <div class="form-group">
                     <label class="control-label" for="firstName"> First Name </label>
                     <!--
@@ -74,12 +82,19 @@
                </div>
 
                <div class="form-group">
-                   <label class="control-label" for="password"> Password </label> <input
+                   <label class="control-label" for="password"> Password123 </label> <input
                        id="password" class="form-control" type="password"
                        th:field="*{password}" required autofocus="autofocus" />
                </div>
 
-               <div class="form-group">
+                <div class="form-group">
+
+                    <div class="g-recaptcha col-sm-5" th:attr="data-sitekey=${@captchaSettings.getSite()}">
+                         </div>
+                    <span id="captchaError" class="alert alert-danger col-sm-4"
+                          style="display:none"></span>
+                </div>                <br><br><br><br>
+                <div class="form-group">
                    <button type="submit" class="btn btn-success">Register</button>
                    <span>Already registered? <a href="/" th:href="@{/login}">Login
                                here</a></span>
@@ -88,5 +103,41 @@
        </div>
    </div>
 </div>
+<div class="parsley-errors-list eoorlogin" id="err"
+     align="center">Tests</div>
+
+<script type="text/javascript">
+
+
+  $(document).ready(function () {
+    $('#registration').submit(function (e) {
+		register(event);
+	});
+  });
+  function register(event){
+
+	event.preventDefault();
+	if (typeof grecaptcha !== 'undefined') {
+        var resp = grecaptcha.getResponse();
+        if (resp.length == 0) {
+            window.location.href = "registration?robot";
+            return;
+        }
+    }
+    var formData= $('form').serialize();
+    $.post("/registration",formData,function(data){
+         console.log("data"+data);
+         if(data == "success"){
+            window.location.href = "registration?success";
+        }
+    }).fail(function(data) {
+        grecaptcha.reset();
+    });
+}
+
+
+
+
+</script>
 </body>
 </html>
