@@ -25,7 +25,9 @@ public class ICaptchaServiceImpl implements ICaptchaService{
 
 
     @Override
-    public void processResponse (HttpServletRequest request, String response) throws InvalidReCaptchaException, ReCaptchaInvalidException {
+    public void processResponse (HttpServletRequest request) throws InvalidReCaptchaException, ReCaptchaInvalidException {
+        String response = request.getParameter("g-recaptcha-response");
+
         System.out.println("Debug101:response - "+response);
         System.out.println("Debug101:getReCaptchaSecret() - "+getReCaptchaSecret());
         System.out.println("Debug101:getClientIP() - "+getClientIP(request));

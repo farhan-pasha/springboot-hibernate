@@ -40,9 +40,8 @@ public class UserRegistrationController {
     @ResponseBody
     //@ModelAttribute("user") contains data coming from front end form which needs to be binded with DTO object
     public String registerUserAccount(@ModelAttribute("user")UserRegistrationDto registrationDto, HttpServletRequest request) throws InvalidReCaptchaException, ReCaptchaInvalidException {
-        String response = request.getParameter("g-recaptcha-response");
         //Shouldnt this be in a BEAN? request
-        captchaService.processResponse(request,response);
+        captchaService.processResponse(request);
         userService.saveToDB(registrationDto);
         return "success";
     }
